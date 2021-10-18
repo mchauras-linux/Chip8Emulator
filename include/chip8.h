@@ -14,4 +14,6 @@ struct chip8
     struct chip8keyboard keyboard;
 };
 
+void chip8Init(struct chip8* chip8);
+
 #endif
