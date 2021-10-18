@@ -1,7 +1,7 @@
 INCLUDES= -I ./include
 FLAGS= -g
 
-OBJECTS=./build/chip8mem.o
+OBJECTS=./build/chip8mem.o ./build/chip8stack.o
 
 all: ${OBJECTS}
 	gcc ${FLAGS} ${INCLUDES} ./src/main.c ${OBJECTS} -L ./lib -lmingw32 -lSDL2main -lSDL2 -o ./bin/main
@@ -9,5 +9,9 @@ all: ${OBJECTS}
 ./build/chip8mem.o:src/chip8mem.c
 	gcc ${FLAGS} ${INCLUDES} ./src/chip8mem.c -c -o ./build/chip8mem.o
 
+./build/chip8stack.o:src/chip8stack.c
+	gcc ${FLAGS} ${INCLUDES} ./src/chip8stack.c -c -o ./build/chip8stack.o
+
 clean:
-	del build\*
+	del /F /Q build\*
+	del /F /Q bin\main.exe
