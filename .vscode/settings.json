@@ -2,6 +2,8 @@
     "files.associations": {
         "chip8.h": "c",
         "sdl.h": "c",
-        "config.h": "c"
+        "config.h": "c",
+        "chip8keyboard.h": "c",
+        "chip8mem.h": "c"
     }
 }
