@@ -11,4 +11,6 @@
 
 #define CHIP8_TOTAL_STACK_DEPTH 16
 
+#define CHIP8_TOTAL_KEYS 16
+
 #endif

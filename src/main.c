@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "SDL2/SDL.h"
 #include "chip8.h"
+#include "chip8keyboard.h"
 
-int main(int argc, char** argv) 
+int main(int argc, char **argv)
 {
     struct chip8 chip8;
 
@@ -11,14 +12,16 @@ int main(int argc, char** argv)
         EMULATOR_WINDOW_TITLE,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        CHIP8_WIDTH * CHIP8_WINDOW_MULTIPLIER, CHIP8_HEIGHT * CHIP8_WINDOW_MULTIPLIER, SDL_WINDOW_SHOWN
+        CHIP8_WIDTH * CHIP8_WINDOW_MULTIPLIER,
+        CHIP8_HEIGHT * CHIP8_WINDOW_MULTIPLIER,
+        SDL_WINDOW_SHOWN
     );
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_TEXTUREACCESS_TARGET);
-    while(1)
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_TEXTUREACCESS_TARGET);
+    while (1)
     {
         SDL_Event event;
-        while(SDL_PollEvent(&event))
+        while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
             {
@@ -35,7 +38,6 @@ int main(int argc, char** argv)
         r.h = 40;
         SDL_RenderFillRect(renderer, &r);
         SDL_RenderPresent(renderer);
-
     }
 
 out:
