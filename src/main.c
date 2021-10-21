@@ -5,25 +5,24 @@
 #include "chip8keyboard.h"
 
 const char keyboard_map[CHIP8_TOTAL_KEYS] = {
-    SDLK_0, SDLK_1, SDLK_2, SDLK_3, 
-    SDLK_4, SDLK_5, SDLK_6, SDLK_7, 
-    SDLK_8, SDLK_9, SDLK_a, SDLK_b, 
-    SDLK_c, SDLK_d, SDLK_e, SDLK_f
-};
+    SDLK_0, SDLK_1, SDLK_2, SDLK_3,
+    SDLK_4, SDLK_5, SDLK_6, SDLK_7,
+    SDLK_8, SDLK_9, SDLK_a, SDLK_b,
+    SDLK_c, SDLK_d, SDLK_e, SDLK_f};
 
 int main(int argc, char **argv)
 {
-    if(argc < 2)
+    if (argc < 2)
     {
         printf("You muct provide a chip8 program to be loaded\n");
         return -1;
     }
 
-    const char* filename = argv[1];
+    const char *filename = argv[1];
     printf("Program to be loaded is: %s\n", filename);
 
-    FILE* fd = fopen(filename, "rb");
-    if(!fd)
+    FILE *fd = fopen(filename, "rb");
+    if (!fd)
     {
         printf("Failed to open file\n");
         return -1;
@@ -40,7 +39,7 @@ int main(int argc, char **argv)
         printf("Failed to read from file\n");
         return -1;
     }
-    
+
     struct chip8 chip8;
     chip8Init(&chip8);
     chip8_load(&chip8, buf, size);
@@ -53,8 +52,7 @@ int main(int argc, char **argv)
         SDL_WINDOWPOS_UNDEFINED,
         CHIP8_WIDTH * CHIP8_WINDOW_MULTIPLIER,
         CHIP8_HEIGHT * CHIP8_WINDOW_MULTIPLIER,
-        SDL_WINDOW_SHOWN
-    );
+        SDL_WINDOW_SHOWN);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_TEXTUREACCESS_TARGET);
     while (1)
@@ -65,6 +63,7 @@ int main(int argc, char **argv)
             switch (event.type)
             {
             case SDL_QUIT:
+                printf("SDL Quit\n");
                 goto out;
             case SDL_KEYDOWN:
             {
@@ -73,6 +72,7 @@ int main(int argc, char **argv)
                 if (vkey != -1)
                 {
                     chip8_keyboard_down(&chip8.keyboard, vkey);
+                    //printf("Key pressed: %c\n", key);
                 }
             }
             break;
@@ -91,6 +91,7 @@ int main(int argc, char **argv)
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+        // printf("SDL Cleared\n");
         for (int x = 0; x < CHIP8_WIDTH; x++)
         {
             for (int y = 0; y < CHIP8_HEIGHT; y++)
@@ -107,20 +108,22 @@ int main(int argc, char **argv)
             }
         }
         SDL_RenderPresent(renderer);
-        if(chip8.registers.delay_timer > 0)
+        if (chip8.registers.delay_timer > 0)
         {
-            Sleep(5);
+            Sleep(1);
             chip8.registers.delay_timer--;
         }
-
-        if(chip8.registers.sound_timer > 0)
+        //printf("Delay Timer\n");
+        if (chip8.registers.sound_timer > 0)
         {
-            printf("Sound Timer: %d",chip8.registers.sound_timer );
+            printf("Sound Timer: %d", chip8.registers.sound_timer);
             Beep(12000, 100 * chip8.registers.sound_timer);
             chip8.registers.sound_timer = 0;
         }
+        // printf("Sound Timer\n");
 
         unsigned short opcode = chip8_mem_get_short(&chip8.memory, chip8.registers.PC);
+        //printf("PC: %x\nOpcode: %x\n", chip8.registers.PC, opcode);
         chip8.registers.PC += 2;
         chip8_exec(&chip8, opcode);
     }

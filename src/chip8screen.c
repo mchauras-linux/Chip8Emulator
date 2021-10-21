@@ -42,5 +42,5 @@ bool chip8_screen_draw_sprite(struct chip8_screen* screen, int x, int y, const c
 
 void chip8_screen_clear(struct chip8_screen* screen)
 {
-    memset(&screen, 0, sizeof(struct chip8_screen));
+    memset(screen->pixels, 0, sizeof(screen->pixels));
 }
