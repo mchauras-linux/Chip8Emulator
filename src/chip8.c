@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "SDL2/SDL.h"
+#include <stdbool.h>
 
 const char chip8_default_character_set[] = {
     0xf0, 0x90, 0x90, 0x90, 0xf0,
@@ -41,7 +42,7 @@ static void chip8_exec_extended_8xxx(struct chip8* chip8, unsigned short opcode)
     unsigned char x = (opcode >> 8) & 0x000F;
     unsigned char y = (opcode >> 4) & 0x000F;
     unsigned char last_nibble = opcode & 0x000F;
-    unsigned short tmp;
+    unsigned short tmp = 0;
     switch (last_nibble)
     {
     //8xy0 - LD Vx, Vy Set Vx = Vy.
@@ -51,44 +52,44 @@ static void chip8_exec_extended_8xxx(struct chip8* chip8, unsigned short opcode)
 
     //8xy1 - OR Vx, Vy Set Vx = Vx OR Vy.
     case 0x01:
-        chip8->registers.V[x] |= chip8->registers.V[y];
+        chip8->registers.V[x] = chip8->registers.V[x] | chip8->registers.V[y];
         break;
 
     //8xy2 - AND Vx, Vy Set Vx = Vx AND Vy.
     case 0x02:
-        chip8->registers.V[x] &= chip8->registers.V[y];
+        chip8->registers.V[x] = chip8->registers.V[x] & chip8->registers.V[y];
         break;
 
     //8xy3 - XOR Vx, Vy Set Vx = Vx XOR Vy.
     case 0x03:
-        chip8->registers.V[x] ^= chip8->registers.V[y];
+        chip8->registers.V[x] = chip8->registers.V[x] ^ chip8->registers.V[y];
         break;
     
     //8xy4 - ADD Vx, Vy Set Vx = Vx + Vy, set VF = carry.
     case 0x04:
         tmp = chip8->registers.V[x] + chip8->registers.V[y];
-        chip8->registers.V[0x0F] = 0;
+        chip8->registers.V[0x0F] = false;
         if (tmp > 0xff)
         {
-            chip8->registers.V[0x0F] = 1;
+            chip8->registers.V[0x0F] = true;
         }
-        chip8->registers.V[x] = tmp & 0x00FF;
+        chip8->registers.V[x] = tmp;
         break;
 
     //8xy5 - SUB Vx, Vy Set Vx = Vx - Vy, set VF = NOT borrow.
     case 0x05:
-        chip8->registers.V[0x0F] = 0;
+        chip8->registers.V[0x0F] = false;
         if (chip8->registers.V[x] > chip8->registers.V[y])
         {
-            chip8->registers.V[0x0F] = 1;
+            chip8->registers.V[0x0F] = true;
         }
-        chip8->registers.V[x] -= chip8->registers.V[y];
+        chip8->registers.V[x] = chip8->registers.V[x] - chip8->registers.V[y];
         break;
 
     //8xy6 - SHR Vx {, Vy} Set Vx = Vx SHR 1.
     case 0x06:
         chip8->registers.V[0x0F] = chip8->registers.V[x] & 0x01;
-        chip8->registers.V[x] = chip8->registers.V[x] >> 1;
+        chip8->registers.V[x] = chip8->registers.V[x] / 2;
         break;
 
     //8xy7 - SUBN Vx, Vy Set Vx = Vy - Vx, set VF = NOT borrow.
@@ -99,13 +100,9 @@ static void chip8_exec_extended_8xxx(struct chip8* chip8, unsigned short opcode)
 
     //8xyE - SHL Vx {, Vy} Set Vx = Vx SHL 1.
     case 0x0E:
-        chip8->registers.V[0x0F] = 0;
-        if ((chip8->registers.V[x] & 0x80) == 0x80)
-        {
-            chip8->registers.V[0x0F] = 1;
-        }
-        chip8->registers.V[x] = chip8->registers.V[x] << 1;
-        break;
+        chip8->registers.V[0x0f] = chip8->registers.V[x] & 0b10000000;
+        chip8->registers.V[x] = chip8->registers.V[x] * 2;
+    break;
     }
 }
 
@@ -285,7 +282,10 @@ static void chip8_exec_extended(struct chip8 *chip8, unsigned short opcode)
 
     //Dxyn - DRW Vx, Vy, nibble Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
     case 0xD000:
-        chip8->registers.V[0x0f] = chip8_screen_draw_sprite(&chip8->screen, chip8->registers.V[x], chip8->registers.V[y], &chip8->memory.memory[chip8->registers.I], n);
+    {
+        const char* sprite = (const char*) &chip8->memory.memory[chip8->registers.I];
+        chip8->registers.V[0x0f] = chip8_screen_draw_sprite(&chip8->screen, chip8->registers.V[x], chip8->registers.V[y], sprite, n);
+    }
     break;
 
     //SKP and SKNP

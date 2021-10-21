@@ -109,7 +109,7 @@ int main(int argc, char **argv)
         SDL_RenderPresent(renderer);
         if(chip8.registers.delay_timer > 0)
         {
-            Sleep(10);
+            Sleep(5);
             chip8.registers.delay_timer--;
         }
 
